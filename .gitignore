@@ -1,0 +1,28 @@
+.fseventsd
+.Trashes
+.metadata_never_index
+._lib*
+._code*
+lib/.*
+
+# Python-specific files
+__pycache__
+*.pyc
+
+# Sphinx build-specific files
+_build
+
+# This file results from running `pip -e install .` in a local repository
+*.egg-info
+
+# Virtual environment-specific files
+.env
+.venv
+
+# MacOS-specific files
+*.DS_Store
+
+# IDE-specific files
+.idea
+.vscode
+*~
