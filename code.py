@@ -26,9 +26,11 @@ YELLOW = (204, 245, 2)
 KEY_MAP = {
     # toggle zoom video
     9: ([cmd, shift, Keycode.V], RED),
+
     # toggle zoom audio
     10: ([cmd, shift, Keycode.A], RED), 
-    # toggle meeting controls
+    
+    # toggle zoom floating meeting controls
     11: ([ctrl, opt, cmd, Keycode.H], YELLOW)
 }
     
