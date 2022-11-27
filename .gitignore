@@ -3,7 +3,7 @@
 .metadata_never_index
 ._lib*
 ._code*
-lib/.*
+lib/*
 
 # Python-specific files
 __pycache__

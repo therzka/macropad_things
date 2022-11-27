@@ -2,6 +2,9 @@ This repo has code I use to personalize my [Adafruit MacroPad RP2040](https://le
 
 
 ## Prerequisite packages to run my code
+
+**Update**: I've included a zipped `lib` directory containing the packages below
+
 You'll need to download the latest [CircuitPython bundle](https://circuitpython.org/libraries) and drag the appropriate packages from the `lib/` directory in the bundle to the `lib/` directory on your mounted macropad (`CIRCUITPY`). [More info here](https://learn.adafruit.com/adafruit-macropad-rp2040/macropad-circuitpython-library)
 
 specifically, you'll need:
@@ -13,6 +16,7 @@ specifically, you'll need:
 - adafruit_hid/ 
 - adafruit_midi/
 - adafruit_ticks.mpy
+
 
 
 ## Adafruit/CircuitPython Resources
