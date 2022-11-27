@@ -4,6 +4,7 @@
 ._lib*
 ._code*
 lib/*
+.TemporaryItems
 
 # Python-specific files
 __pycache__
