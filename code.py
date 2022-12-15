@@ -11,6 +11,7 @@ import usb_hid
 
 macropad = MacroPad()
 pixels = macropad.pixels
+
 kbd = Keyboard(usb_hid.devices)
 
 right = Keycode.RIGHT_ARROW
@@ -22,29 +23,43 @@ opt = Keycode.OPTION
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 YELLOW = (204, 245, 2)
+WHITE = (255, 255, 255)
 
+# maps the numeric macropad key number to a tuple containing an list of key(s) to send
+# and the color to set the key to on the macropad
 KEY_MAP = {
-    # toggle zoom video
-    9: ([cmd, shift, Keycode.V], RED),
-
+    0: ([], WHITE),
+    1: ([], WHITE),
+    2: ([], WHITE),
+    3: ([], WHITE),
+    4: ([], WHITE),
+    5: ([], WHITE),
+    6: ([], WHITE),
+    7: ([], WHITE),
+    8: ([], WHITE),
     # toggle zoom audio
-    10: ([cmd, shift, Keycode.A], RED), 
+    9: ([cmd, shift, Keycode.A], RED),
+
+    # toggle zoom video
+    10: ([cmd, shift, Keycode.V], RED), 
     
     # toggle zoom floating meeting controls
     11: ([ctrl, opt, cmd, Keycode.H], YELLOW)
 }
     
-# set initial key colors
+# set initial key colors and brightness
+pixels.brightness = 0.2
 for k, v in KEY_MAP.items():
     pixels[k] = v[1]
-    pixels.brightness = 0.3
     pixels.show()
 
 # WARNING: this will only be your initial state when you start a meeting if your Zoom settings are set to
-# "mute my mic when joining a meeting" and "stop my video when joining a meeting"
+# "mute my mic when joining a meeting" and "stop my video when joining a meeting" and will only accurately
+# reflect your state if you don't toggle these manually via the zoom UI
 vol_state = False
 video_state = False
 
+## set initial display text
 text = macropad.display_text(text_scale=2)
 text[0].text = "MUTED"
 text[1].text = "VIDEO OFF"
@@ -53,8 +68,21 @@ text[1].text = "VIDEO OFF"
 encoder_last = 0
 
 # Toggle LED from green to red or vice-versa
-def toggle_led(key_num):
-    pixels[key_num] = GREEN if pixels[key_num] == RED else RED
+# uncomment the audio lines to play a sound when toggling 
+# (you must add the audio files to an audio directory and name the files accordingly)
+
+# ON_AUDIO = "audio/on-tone.mp3"
+# OFF_AUDIO = "audio/off-tone.mp3"
+
+def toggle_led_and_sound(key_num):
+    if pixels[key_num] not in [RED, GREEN]:
+        return
+    if pixels[key_num] == GREEN:
+        # macropad.play_file(OFF_AUDIO)
+        pixels[key_num] = RED
+    else:
+        # macropad.play_file(ON_AUDIO)
+        pixels[key_num] = GREEN
 
 while True:
     # Switch desktops via encoder rotation
@@ -70,21 +98,27 @@ while True:
 
     # send keyboard events mapped to keypad
     key_event = macropad.keys.events.get()
-    if key_event and key_event.pressed:
-        key_num = key_event.key_number
-        keys_to_send = KEY_MAP.get(key_num)[0]
-        if keys_to_send:
-            if key_num == 9:
-                video_state = not video_state
-                text[1].text = "VIDEO {}".format("ON" if video_state else "OFF")
-                toggle_led(key_num) 
+    if key_event:
+        if key_event.pressed:
+            key_num = key_event.key_number
+            keys_to_send = KEY_MAP.get(key_num)[0]
+            if keys_to_send:
+                # toggle zoom video
+                if key_num == 9:
+                    video_state = not video_state
+                    text[1].text = "VIDEO {}".format("ON" if video_state else "OFF")
 
-            if key_num == 10:
-                vol_state = not vol_state
-                text[0].text = "{}MUTED".format("NOT " if vol_state else "")
-                toggle_led(key_num)
-            kbd.press(*KEY_MAP[key_num][0])
-            kbd.release_all()
+                # toggle zoom audio
+                if key_num == 10:
+                    vol_state = not vol_state
+                    text[0].text = "{}MUTED".format("NOT " if vol_state else "")
+                
+                toggle_led_and_sound(key_num)
+
+                keys_to_press = KEY_MAP[key_num][0]
+                if keys_to_press:
+                    kbd.press(*keys_to_press)
+                kbd.release_all()
 
     # TODO: action when rotary switch is pressed
     macropad.encoder_switch_debounced.update()
