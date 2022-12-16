@@ -108,11 +108,18 @@ async def rpc_call(function, *args, **kwargs):
         raise RpcError(response["message"])
     return response["return_val"]
 
+async def blink_led(sleep=0.3):
+    while True:
+        macropad.red_led = True
+        await asyncio.sleep(sleep)
+        macropad.red_led = False
+        await asyncio.sleep(sleep)
+
 
 async def connect_and_get_username():
     server_is_running = False
     start_time = time.time()
-    ATTEMPTS = 2
+    ATTEMPTS = 5
     current_attempt = 0
     username = ""
     while not server_is_running and current_attempt < ATTEMPTS:
@@ -144,6 +151,7 @@ async def main():
     hostname = "RPI Macropad"
     username = "A"
     host_user_task = asyncio.create_task(connect_and_get_username())
+    blink_led_task = asyncio.create_task(blink_led())
     hostUserNameFuture = asyncio.gather(host_user_task)
 
     kbd = Keyboard(usb_hid.devices)
@@ -190,6 +198,11 @@ async def main():
             hostname, username = (await hostUserNameFuture)[0]
             text[0].text = center_text(f"{username}@{hostname}")
             hostnameSet = True
+            try:
+                blink_led_task.cancel()
+            except CancelledError:
+                pass
+            macropad.red_led = False
         # hostname, username = asyncio.run(connect_and_get_username())
         # Switch desktops via encoder rotation
         encoder_position = macropad.encoder
