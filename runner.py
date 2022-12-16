@@ -17,24 +17,23 @@ from rainbowio import colorwheel
 
 class Runner:
     def __init__(self):
-        hostname = "Disconnected"
-        username = "None"
-        os = "UNKNOWN"
-        futures = None
-        macropad = MacroPad()
-        rpc = RpcClient()
-        kbd = Keyboard(usb_hid.devices)
-        LIMIT_ATTEMPTS = False
-        ATTEMPTS = 100
+        self.hostname = "Disconnected"
+        self.username = "None"
+        self.os = "UNKNOWN"
+        self.futures = None
+        self.macropad = MacroPad()
+        self.rpc = RpcClient()
+        self.kbd = Keyboard(usb_hid.devices)
+        self.LIMIT_ATTEMPTS = False
+        self.ATTEMPTS = 100
 
         # text[0].text = center_text(f"{username}@{hostname}")
         # set initial encoder position
-        encoder_last = 0
-        _states = {}
-        _state = 0 # -1 is a special mode
-        text = macropad.display_text(text_scale=1)
-        pixels = macropad.pixels
-        set_global_state()
+        self.encoder_last = 0
+        self._states = {}
+        self._state = 0 # -1 is a special mode
+        self.text = self.macropad.display_text(text_scale=1)
+        self.pixels = self.macropad.pixels
     
     @property
     def state(self):
@@ -56,40 +55,40 @@ class Runner:
     def configState(self, stateDictionary):
       self.AddState(stateDictionary)
     
-    def AddState(self, stateDictionary):
+    def AddState(self, stateDictionary, element=0):
       if stateDictionary.isConfig:
         self._states[-1] = stateDictionary
       else:
-        state_count = len(self._states)
-        self._states[state_count+1] = stateDictionary
+        self._states[element] = stateDictionary
         self.configState.add_label(stateDictionary.name)
 
+    @staticmethod
     def center_text(text, char=21):
       return f"{text : ^{char}}"
-
+    @staticmethod
     def right_text(text, char=21):
       return f"{text : >21}"
-
+    @staticmethod
     def left_text(text, char=21):
       return f"{text : <21}"
 
     def update_pixels_with_keymap(self, keymap=None):
-      this.pixels.brightness = 0.2 # TODO: put this elsewhere
+      self.pixels.brightness = 0.2 # TODO: put this elsewhere
       if keymap is not None:
         for k, v in keymap.items():
           self.pixels[k] = v[1]
       else:
-        for k, v in self.state.keymap.items():
+        for k, v in self.state.key_map.items():
           self.pixels[k] = v[1]
       self.pixels.show()
     
     def update_state_labels_and_name(self, name, rotary_label, name_col=1, rot_col=2, wrap_func=None):
       if wrap_func is None:
-        self.text[name_col] = name
-        self.text[rot_col] = rotary_label
+        self.text[name_col].text = name
+        self.text[rot_col].text = rotary_label
       else:
-        self.text[name_col] = wrap_func(name)
-        self.text[rot_col] = wrap_func(rotary_label)
+        self.text[name_col].text = wrap_func(name)
+        self.text[rot_col].text = wrap_func(rotary_label)
 
     def set_global_state(self, state=0):
       self.state = state # Update our current state
@@ -131,7 +130,7 @@ class Runner:
       current_attempt = 0
       username = ""
       print("Waiting for HOST")
-      while not server_is_running and (current_attempt < ATTEMPTS or not LIMIT_ATTEMPTS):
+      while not server_is_running and (current_attempt < self.ATTEMPTS or not self.LIMIT_ATTEMPTS):
         try:
           if (self.LIMIT_ATTEMPTS):
             print("Waiting for HOST")
@@ -184,19 +183,20 @@ class Runner:
 
     async def main(self):
       # initial setup stuff.
+      self.set_global_state()
       host_user_task = asyncio.create_task(self.connect_and_get_username())
       blink_led_task = asyncio.create_task(self.blink_led())
       self.futures = asyncio.gather(host_user_task)
       hostNameSet = False
-      modifier += 1
-      while true:
+      modifier = 0
+      while True:
         if (not hostNameSet):
           hostNameSet = self.update_os_hostname_username()
         self.update_mode() # check if we clicked.
-        self.global_states[self.active_state].loop(self.macropad, self.text)
-        if (global_states[self.active_state].use_rainbow):
-          this.rainbow_scan(modifier, diff=20)
+        self.state.loop(self.macropad, self.text, self.kbd)
+        if (self.state.use_rainbow):
+          self.rainbow_scan(modifier, diff=20)
         modifier += 1
         if modifier == 256:
           modifier = 0
-        await asyncio.sleep(global_states[self.active_state].update_frequency)
+        await asyncio.sleep(self.state.update_frequency)

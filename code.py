@@ -13,16 +13,23 @@ import time
 import asyncio
 from rainbowio import colorwheel
 # from adafruit_hid.consumer_control_code import ConsumerControlCode
-from states import State, Config
+from states import State, ConfigState
 from runner import Runner
+from key_maps import *
 
 runner = Runner()
-config = Config()
+config = ConfigState()
 ten_key = State()
+ten_key.key_map = TEN_KEY_MAP
+ten_key.use_rainbow = True
+ten_key.name = "10-Key"
+ten_key.control_volume = True
+ten_key.rotary_label = "Volume"
 test = State()
 off = State()
+off.name = "OFF"
 runner.AddState(config)
-runner.AddState(ten_key)
-runner.AddState(test)
-runner.AddState(off)
+runner.AddState(ten_key, 0)
+runner.AddState(test, 1)
+runner.AddState(off, 2)
 asyncio.run(runner.main())
