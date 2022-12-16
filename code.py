@@ -112,7 +112,6 @@ def rainbow_scan(modifier, diff=10):
 async def rpc_call(function, *args, **kwargs):
     responseTask = asyncio.create_task(rpc.call(function, *args, **kwargs))
     response = (await asyncio.gather(responseTask))[0]
-    print(response)
     if response["error"]:
         raise RpcError(response["message"])
     return response["return_val"]
@@ -128,18 +127,22 @@ async def blink_led(sleep=0.3):
 async def connect_and_get_username():
     server_is_running = False
     start_time = time.time()
-    ATTEMPTS = 5
+    LIMIT_ATTEMPTS = False
+    ATTEMPTS = 100
     current_attempt = 0
     username = ""
-    while not server_is_running and current_attempt < ATTEMPTS:
+    print("Waiting for HOST")
+    while not server_is_running and (current_attempt < ATTEMPTS or not LIMIT_ATTEMPTS):
         try:
-            print("Waiting for HOST")
+            if (LIMIT_ATTEMPTS):
+                print("Waiting for HOST")
             await rpc_call("is_running")
             server_is_running = True
             print("Connected")
         except RpcError as e:
-            current_attempt += 1
-            print(f"Attempt {current_attempt} of {ATTEMPTS}")
+            if (LIMIT_ATTEMPTS):
+                print(f"Attempt {current_attempt} of {ATTEMPTS}")
+                current_attempt += 1
             pass
 
     if server_is_running:
@@ -152,13 +155,13 @@ async def connect_and_get_username():
             username = "ERROR"
             return hostname, username
     else:
-        hostname = "RPI Macropad"
-        username = "A"
+        hostname = "Disconnected"
+        username = "None"
         return hostname, username
 
 async def main():
-    hostname = "RPI Macropad"
-    username = "A"
+    hostname = "Disconnected"
+    username = "None"
     host_user_task = asyncio.create_task(connect_and_get_username())
     blink_led_task = asyncio.create_task(blink_led())
     hostUserNameFuture = asyncio.gather(host_user_task)
@@ -236,12 +239,12 @@ async def main():
                     # toggle zoom video
                     if key_num == 9:
                         video_state = not video_state
-                        text[1].text = "VIDEO {}".format("ON" if video_state else "OFF")
+                        # text[1].text = "VIDEO {}".format("ON" if video_state else "OFF")
 
                     # toggle zoom audio
                     if key_num == 10:
                         vol_state = not vol_state
-                        text[0].text = "{}MUTED".format("NOT " if vol_state else "")
+                        # text[0].text = "{}MUTED".format("NOT " if vol_state else "")
                     
                     toggle_led_and_sound(key_num)
 
