@@ -29,6 +29,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 YELLOW = (204, 245, 2)
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 # maps the numeric macropad key number to a tuple containing an list of key(s) to send
 # and the color to set the key to on the macropad
@@ -45,6 +46,20 @@ TEN_KEY_MAP = {
     9: ([Keycode.ZERO], RED),
     10: ([Keycode.BACKSPACE], RED),   
     11: ([Keycode.ENTER], RED)
+}
+NO_KEY_MAP = {
+    0: ([None], BLACK),
+    1: ([None], BLACK),
+    2: ([None], BLACK),
+    3: ([None], BLACK),
+    4: ([None], BLACK),
+    5: ([None], BLACK),
+    6: ([None], BLACK),
+    7: ([None], BLACK),
+    8: ([None], BLACK),
+    9: ([None], BLACK),
+    10: ([None], BLACK),   
+    11: ([None], BLACK)
 }
 TEST_KEY_MAP = {
     0: ([Keycode.ONE], WHITE),
@@ -71,24 +86,35 @@ TEN_KEY = {
     "NAME": "10-Key",
     "USE_RAINBOW": True,
     "ROTARY_LABEL": "Volume",
-    "CONTROL_VOLUME": True
+    "CONTROL_VOLUME": True,
+    "UPDATE": 0.01
     }
 TEST = {
     "KEYMAP": TEST_KEY_MAP,
     "NAME": "Test",
     "USE_RAINBOW": False,
     "ROTARY_LABEL": "Volume",
-    "CONTROL_VOLUME": True
+    "CONTROL_VOLUME": True,
+    "UPDATE": 0.01
     }
 HA = {
     "KEYMAP": TEN_KEY_MAP,
     "NAME": "Home Assistant",
     "USE_RAINBOW": False,
     "ROTARY_LABEL": "Lights",
-    "CONTROL_VOLUME": False
+    "CONTROL_VOLUME": False,
+    "UPDATE": 0.01
+    }
+OFF = {
+    "KEYMAP": NO_KEY_MAP,
+    "NAME": "OFF",
+    "USE_RAINBOW": False,
+    "ROTARY_LABEL": "",
+    "CONTROL_VOLUME": False,
+    "UPDATE": 0.05
     }
 
-GLOBAL_STATES = { 0: TEN_KEY, 1: TEST, 2: HA }
+GLOBAL_STATES = { 0: TEN_KEY, 1: TEST, 2: HA, 3: OFF }
 pixels = macropad.pixels
 text = macropad.display_text(text_scale=1)
 
@@ -264,7 +290,8 @@ async def main():
                     toggle_led_and_sound(key_num)
 
                     keys_to_press = GLOBAL_STATES[ACTIVE_STATE]["KEYMAP"][key_num][0]
-                    if keys_to_press:
+                    # what a hacky little check.
+                    if keys_to_press[0] is not None:
                         kbd.press(*keys_to_press)
                     kbd.release_all()
 
@@ -285,6 +312,6 @@ async def main():
         if (GLOBAL_STATES[ACTIVE_STATE]["USE_RAINBOW"]):
             rainbow_scan(modifier, diff=20)
         modifier += 1
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(GLOBAL_STATES[ACTIVE_STATE]["UPDATE"])
 
 asyncio.run(main())
