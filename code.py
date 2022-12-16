@@ -12,6 +12,7 @@ import usb_hid
 import time
 import asyncio
 from rainbowio import colorwheel
+# from adafruit_hid.consumer_control_code import ConsumerControlCode
 
 macropad = MacroPad()
 rpc = RpcClient()
@@ -41,14 +42,9 @@ TEN_KEY_MAP = {
     6: ([Keycode.ONE], RED),
     7: ([Keycode.TWO], RED),
     8: ([Keycode.THREE], RED),
-    # toggle zoom audio
-    9: ([cmd, shift, Keycode.A], RED),
-
-    # toggle zoom video
-    10: ([cmd, shift, Keycode.V], RED), 
-    
-    # toggle zoom floating meeting controls
-    11: ([ctrl, opt, cmd, Keycode.H], YELLOW)
+    9: ([Keycode.ZERO], RED),
+    10: ([Keycode.BACKSPACE], RED),   
+    11: ([Keycode.ENTER], RED)
 }
 TEST_KEY_MAP = {
     0: ([Keycode.ONE], WHITE),
@@ -221,12 +217,18 @@ async def main():
         # Switch desktops via encoder rotation
         encoder_position = macropad.encoder
         if encoder_position > encoder_last:
-            kbd.press(right, ctrl)
-            kbd.release_all()
+            macropad.consumer_control.send(
+                macropad.ConsumerControlCode.VOLUME_INCREMENT
+            )
+            # kbd.press(right, ctrl)
+            # kbd.release_all()
             encoder_last = encoder_position
         if encoder_position < encoder_last:
-            kbd.press(left, ctrl)
-            kbd.release_all()
+            macropad.consumer_control.send(
+                macropad.ConsumerControlCode.VOLUME_DECREMENT
+            )
+            # kbd.press(left, ctrl)
+            # kbd.release_all()
             encoder_last = encoder_position
 
         # send keyboard events mapped to keypad
