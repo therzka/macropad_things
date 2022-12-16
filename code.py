@@ -152,19 +152,23 @@ async def connect_and_get_username():
         try:
             hostname = await rpc_call("get_hostname")
             username = await rpc_call("get_username")
-            return hostname, username
+            os = await rpc_call("get_os")
+            return hostname, username, os
         except:
             hostname = "ERROR"
             username = "ERROR"
-            return hostname, username
+            os = "ERROR"
+            return hostname, username, os
     else:
         hostname = "Disconnected"
         username = "None"
-        return hostname, username
+        os = "UNKNOWN"
+        return hostname, username, os
 
 async def main():
     hostname = "Disconnected"
     username = "None"
+    os = "UNKNOWN"
     host_user_task = asyncio.create_task(connect_and_get_username())
     blink_led_task = asyncio.create_task(blink_led())
     hostUserNameFuture = asyncio.gather(host_user_task)
@@ -211,8 +215,9 @@ async def main():
 
     while True:
         if (not hostnameSet and host_user_task.done()):
-            hostname, username = (await hostUserNameFuture)[0]
+            hostname, username, os = (await hostUserNameFuture)[0]
             text[0].text = center_text(f"{username}@{hostname}")
+            text[3].text = center_text(f":: {os}  ::")
             hostnameSet = True
             try:
                 blink_led_task.cancel()

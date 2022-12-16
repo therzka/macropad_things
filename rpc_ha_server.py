@@ -9,6 +9,7 @@ import socket
 import os
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 import asyncio
+from sys import platform
 from rpc import RpcServer
 
 mqtt_client = None
@@ -48,12 +49,16 @@ def mqtt_init(broker, port=1883, username=None, password=None):
     mqtt_client.on_connect = connect
     mqtt_client.on_disconnect = disconnect
     mqtt_client.on_message = message
+    print("MQTT INIT!")
 
 def get_hostname():
     return socket.gethostname()
 
 def get_username():
     return os.getlogin()
+
+def get_os():
+    return platform
 
 def mqtt_connect():
     mqtt_client.connect()
