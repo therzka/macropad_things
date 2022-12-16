@@ -94,7 +94,7 @@ class ConfigState(State):
         self.activeState += 1
       self.encoder_last = encoder_position
     if encoder_position < self.encoder_last:
-      if self.activeState - 1 <= 0:
+      if self.activeState - 1 < 0:
         self.activeState = len(self.labels)-1
       else:
         self.activeState -= 1

@@ -167,19 +167,24 @@ class Runner:
           self.set_global_state(-1) # -1 is a "config" mode
         else:
           self.set_global_state(self.state.get_selected_state()) # if we're in config mode, get the selected highlighted state.
+          self.set_hostname_os_display()
 
-    async def update_os_hostname_username(self):
-      if (host_user_task.done()):
-        hostname, username, os = (await self.futures)[0]
-        self.text[0].text = center_text(f"{username}@{hostname}")
-        self.text[3].text = center_text(f":: {os}  ::")
-        try:
-          blink_led_task.cancel()
-        except CancelledError:
-          pass
-        self.macropad.red_led = False
-        return True
-      return False
+    # async def update_os_hostname_username(self):
+    #   if (host_user_task.done()):
+    #     hostname, username, os = (await self.futures)[0]
+    #     self.text[0].text = center_text(f"{username}@{hostname}")
+    #     self.text[3].text = center_text(f":: {os}  ::")
+    #     try:
+    #       blink_led_task.cancel()
+    #     except CancelledError:
+    #       pass
+    #     self.macropad.red_led = False
+    #     return True
+    #   return False
+
+    def set_hostname_os_display(self):
+      self.text[0].text = self.center_text(f"{self.username}@{self.hostname}")
+      self.text[3].text = self.center_text(f":: {self.os}  ::")
 
     async def main(self):
       # initial setup stuff.
@@ -191,7 +196,16 @@ class Runner:
       modifier = 0
       while True:
         if (not hostNameSet):
-          hostNameSet = self.update_os_hostname_username()
+          if (host_user_task.done()):
+            self.hostname, self.username, self.os = (await self.futures)[0]
+            self.set_hostname_os_display()
+            hostNameSet = True
+            try:
+              blink_led_task.cancel()
+            except CancelledError:
+              pass
+            self.macropad.red_led = False
+          print(hostNameSet)
         self.update_mode() # check if we clicked.
         self.state.loop(self.macropad, self.text, self.kbd)
         if (self.state.use_rainbow):
