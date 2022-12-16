@@ -69,17 +69,23 @@ TEST_KEY_MAP = {
 TEN_KEY = {
     "KEYMAP": TEN_KEY_MAP,
     "NAME": "10-Key",
-    "USE_RAINBOW": True
+    "USE_RAINBOW": True,
+    "ROTARY_LABEL": "Volume",
+    "CONTROL_VOLUME": True
     }
 TEST = {
     "KEYMAP": TEST_KEY_MAP,
     "NAME": "Test",
-    "USE_RAINBOW": False
+    "USE_RAINBOW": False,
+    "ROTARY_LABEL": "Volume",
+    "CONTROL_VOLUME": True
     }
 HA = {
     "KEYMAP": TEN_KEY_MAP,
     "NAME": "Home Assistant",
-    "USE_RAINBOW": False
+    "USE_RAINBOW": False,
+    "ROTARY_LABEL": "Lights",
+    "CONTROL_VOLUME": False
     }
 
 GLOBAL_STATES = { 0: TEN_KEY, 1: TEST, 2: HA }
@@ -98,7 +104,8 @@ def set_global_state(state=0):
     for k, v in GLOBAL_STATES[state]["KEYMAP"].items():
         pixels[k] = v[1]
         pixels.show()
-    text[2].text = right_text(GLOBAL_STATES[state]["NAME"])
+    text[1].text = right_text(GLOBAL_STATES[state]["NAME"])
+    text[2].text = right_text(GLOBAL_STATES[state]["ROTARY_LABEL"])
 
 def rainbow_scan(modifier, diff=10):
     for key in range(0,12):
@@ -177,7 +184,6 @@ async def main():
     ## At a scale of 1m we just hit the 1 on the 13... so we have about 22 characters.
 
     text[0].text = center_text(f"{username}@{hostname}")
-    text[1].text = right_text("BETA")
 
     # set initial encoder position
     encoder_last = 0
@@ -217,16 +223,18 @@ async def main():
         # Switch desktops via encoder rotation
         encoder_position = macropad.encoder
         if encoder_position > encoder_last:
-            macropad.consumer_control.send(
-                macropad.ConsumerControlCode.VOLUME_INCREMENT
-            )
+            if GLOBAL_STATES[ACTIVE_STATE]["CONTROL_VOLUME"]:
+                macropad.consumer_control.send(
+                    macropad.ConsumerControlCode.VOLUME_INCREMENT
+                )
             # kbd.press(right, ctrl)
             # kbd.release_all()
             encoder_last = encoder_position
         if encoder_position < encoder_last:
-            macropad.consumer_control.send(
-                macropad.ConsumerControlCode.VOLUME_DECREMENT
-            )
+            if GLOBAL_STATES[ACTIVE_STATE]["CONTROL_VOLUME"]:
+                macropad.consumer_control.send(
+                    macropad.ConsumerControlCode.VOLUME_DECREMENT
+                )
             # kbd.press(left, ctrl)
             # kbd.release_all()
             encoder_last = encoder_position
