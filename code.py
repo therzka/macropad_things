@@ -11,6 +11,7 @@ from rpc import RpcClient, RpcError
 import usb_hid
 import time
 import asyncio
+from rainbowio import colorwheel
 
 macropad = MacroPad()
 rpc = RpcClient()
@@ -71,15 +72,18 @@ TEST_KEY_MAP = {
 
 TEN_KEY = {
     "KEYMAP": TEN_KEY_MAP,
-    "NAME": "10-Key"
+    "NAME": "10-Key",
+    "USE_RAINBOW": True
     }
 TEST = {
     "KEYMAP": TEST_KEY_MAP,
-    "NAME": "Test"
+    "NAME": "Test",
+    "USE_RAINBOW": False
     }
 HA = {
     "KEYMAP": TEN_KEY_MAP,
-    "NAME": "Home Assistant"
+    "NAME": "Home Assistant",
+    "USE_RAINBOW": False
     }
 
 GLOBAL_STATES = { 0: TEN_KEY, 1: TEST, 2: HA }
@@ -99,6 +103,11 @@ def set_global_state(state=0):
         pixels[k] = v[1]
         pixels.show()
     text[2].text = right_text(GLOBAL_STATES[state]["NAME"])
+
+def rainbow_scan(modifier, diff=10):
+    for key in range(0,12):
+        pixels[key] = colorwheel(modifier+(key*diff))
+        pixels.show()
 
 async def rpc_call(function, *args, **kwargs):
     responseTask = asyncio.create_task(rpc.call(function, *args, **kwargs))
@@ -193,6 +202,8 @@ async def main():
 
     hostnameSet = False
     ACTIVE_STATE = 0
+    modifier = 1
+
     while True:
         if (not hostnameSet and host_user_task.done()):
             hostname, username = (await hostUserNameFuture)[0]
@@ -253,6 +264,9 @@ async def main():
         #     text[2].text = "Released!"
 
         text.show()
+        if (GLOBAL_STATES[ACTIVE_STATE]["USE_RAINBOW"]):
+            rainbow_scan(modifier, diff=20)
+        modifier += 1
         await asyncio.sleep(0.01)
 
 asyncio.run(main())
