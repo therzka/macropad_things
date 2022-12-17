@@ -34,6 +34,7 @@ class Runner:
         self._state = 0 # -1 is a special mode
         self.text = self.macropad.display_text(text_scale=1)
         self.pixels = self.macropad.pixels
+        self.color_additions = [0,0,0,0,0,0,0,0,0,0,0,0]
     
     @property
     def state(self):
@@ -97,7 +98,11 @@ class Runner:
 
     def rainbow_scan(self, modifier, diff=10):
       for key in range(0, 12):
-        self.pixels[key] = colorwheel(modifier+(key*diff))
+        self.pixels[key] = colorwheel(modifier+(key*diff)+self.color_additions[key])
+        if self.color_additions[key] != 0:
+          self.color_additions[key] -= diff/4
+        if self.color_additions[key] < 0:
+          self.color_additions[key] = 0
         self.pixels.show()
 
     async def rpc_call(self, function, *args, **kwargs):
@@ -207,7 +212,8 @@ class Runner:
             self.macropad.red_led = False
           print(hostNameSet)
         self.update_mode() # check if we clicked.
-        self.state.loop(self.macropad, self.text, self.kbd)
+        self.state.loop(self.macropad, self.text, self.kbd, self.color_additions)
+        self.text.show()
         if (self.state.use_rainbow):
           self.rainbow_scan(modifier, diff=20)
         modifier += 1

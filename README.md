@@ -1,10 +1,13 @@
 This repo has code I use to personalize my [Adafruit MacroPad RP2040](https://learn.adafruit.com/adafruit-macropad-rp2040) using [CircuitPython](https://docs.circuitpython.org/en/latest/README.html).
 
 currently it allows for
-- switching between Mac OS desktops by turning the encoder (knob) right or left
-- toggle Zoom audio
-- toggle Zoom video
-- toggle Zoom floating meeting controls
+- 10 key pad
+- rainbow scanning!
+- modal shifting!
+- printing your hostname, username, and operating system type!
+
+
+What follows is (part) of the README I forked from because I don't quite remember which libraries I actually used, but you'll definitely need, uh... a few of them.
 
 (along with some LED and screen fanciness)
 

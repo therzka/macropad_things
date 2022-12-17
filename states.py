@@ -23,24 +23,26 @@ class State:
     self.use_rainbow = False
     self.rotary_label = ""
     self.control_volume = False
-    self.update_frequency = 0.01
+    self.rotary_enabled = self.control_volume
+    self.update_frequency = 0.001
     self.isConfig = False
     self.encoder_last = 0
 
-  def loop(self, macropad, text, kbd):
-    encoder_position = macropad.encoder
-    if encoder_position > self.encoder_last:
-      if self.control_volume:
-        macropad.consumer_control.send(
-          macropad.ConsumerControlCode.VOLUME_INCREMENT
-        )
-        self.encoder_last = encoder_position
-    if encoder_position < self.encoder_last:
-      if self.control_volume:
-        macropad.consumer_control.send(
-          macropad.ConsumerControlCode.VOLUME_DECREMENT
-        )
-        self.encoder_last = encoder_position
+  def loop(self, macropad, text, kbd, color_additions):
+    if self.rotary_enabled:
+      encoder_position = macropad.encoder
+      if encoder_position > self.encoder_last:
+        if self.control_volume:
+          macropad.consumer_control.send(
+            macropad.ConsumerControlCode.VOLUME_INCREMENT
+          )
+          self.encoder_last = encoder_position
+      if encoder_position < self.encoder_last:
+        if self.control_volume:
+          macropad.consumer_control.send(
+            macropad.ConsumerControlCode.VOLUME_DECREMENT
+          )
+          self.encoder_last = encoder_position
 
     # send keyboard events mapped to keypad
     key_event = macropad.keys.events.get()
@@ -48,14 +50,15 @@ class State:
       if key_event.pressed:
         key_num = key_event.key_number
         keys_to_send = self.key_map.get(key_num)[0]
+        color_additions[key_num] = 128
         if keys_to_send:
           # toggle zoom video
-          if key_num == 9:
-            video_state = not video_state
+          # if key_num == 9:
+          #   video_state = not video_state
 
-          # toggle zoom audio
-          if key_num == 10:
-            vol_state = not vol_state
+          # # toggle zoom audio
+          # if key_num == 10:
+          #   vol_state = not vol_state
 
           # toggle_led_and_sound(key_num)
 
@@ -65,7 +68,7 @@ class State:
             kbd.press(*keys_to_press)
           kbd.release_all()
 
-    text.show()
+    # text.show()
 
 class ConfigState(State):
   def __init__(self):
@@ -85,7 +88,7 @@ class ConfigState(State):
   def add_label(self, label):
     self.labels.append(label)
 
-  def loop(self, macropad, text, kbd):
+  def loop(self, macropad, text, kbd, color_additions):
     encoder_position = macropad.encoder
     if encoder_position > self.encoder_last:
       if self.activeState + 1 >= len(self.labels):
@@ -101,4 +104,4 @@ class ConfigState(State):
 
       self.encoder_last = encoder_position
     text[3].text = self.labels[self.activeState]
-    text.show()
+    # text.show()

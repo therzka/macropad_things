@@ -24,12 +24,15 @@ ten_key.key_map = TEN_KEY_MAP
 ten_key.use_rainbow = True
 ten_key.name = "10-Key"
 ten_key.control_volume = True
+ten_key.rotary_enabled = True
 ten_key.rotary_label = "Volume"
-test = State()
+color_test = State()
+color_test.name = "COLORTEST"
+color_test.use_rainbow = True
 off = State()
 off.name = "OFF"
 runner.AddState(config)
 runner.AddState(ten_key, 0)
-runner.AddState(test, 1)
+runner.AddState(color_test, 1)
 runner.AddState(off, 2)
 asyncio.run(runner.main())
