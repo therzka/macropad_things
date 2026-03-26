@@ -34,10 +34,10 @@ ORANGE = (255, 80, 0)
 # and the color to set the key to on the macropad
 #
 # Layout:
-#   [0: CMD PALETTE]  [1: QUICK OPEN]  [2: TOGGLE TERM]   <- VSCode
-#   [3: FIND FILES]   [4: FORMAT DOC]  [5: TOGGLE SIDE]   <- VSCode
-#   [6: DEV TOOLS]    [7: SPLIT PANE]  [8: CLEAR BUFF]    <- Arc / iTerm2
-#   [9: TEAMS AUDIO] [10: TEAMS VIDEO] [11: RAISE HAND]   <- Teams
+#   [0]  Cmd+Shift+P  Command Palette     [1]  Cmd+P        Quick Open File      [2]  Ctrl+`       Toggle Terminal
+#   [3]  Cmd+Shift+F  Find in Files       [4]  Shift+Opt+F  Format Document      [5]  Cmd+B        Toggle Sidebar
+#   [6]  Cmd+Opt+I    Arc DevTools        [7]  Cmd+D        iTerm2 Split Pane    [8]  Cmd+K        iTerm2 Clear Buffer
+#   [9]  Cmd+Shift+M  Teams Toggle Audio  [10] Cmd+Shift+O  Teams Toggle Video   [11] Cmd+Shift+K  Teams Raise Hand
 KEY_MAP = {
     # VSCode
     0: ([cmd, shift, Keycode.P], BLUE),         # Command Palette
